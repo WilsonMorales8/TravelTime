@@ -2,21 +2,28 @@ package main;
 
 public class Station {
 	
+	private String cityName;
+	private int distance;
 	
 	public Station(String name, int dist) {
+		this.cityName = name;
+		this.distance = dist;
 	}
 	
 	public String getCityName() {
-		
+		return cityName;
 	}
+	
 	public void setCityName(String cityName) {
-		
+		this.cityName = cityName;
 	}
+	
 	public int getDistance() {
-		
+		return distance;
 	}
+	
 	public void setDistance(int distance) {
-		
+		this.distance = distance;
 	}
 
 	@Override
