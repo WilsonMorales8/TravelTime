@@ -109,11 +109,11 @@ public class TrainStationManager {
 	    Stack<Station> helpStack = new LinkedListStack<>();
 	    
 	    while (!stackToSort.isEmpty()) {
-	        Station current = stackToSort.pop();
-	        while (!helpStack.isEmpty() && helpStack.top().getDistance() > current.getDistance()) {
+	        Station currentStation = stackToSort.pop();
+	        while (!helpStack.isEmpty() && helpStack.top().getDistance() > currentStation.getDistance()) {
 	            stackToSort.push(helpStack.pop());
 	        }
-	        helpStack.push(current);
+	        helpStack.push(currentStation);
 	    }
 	    while (!helpStack.isEmpty()) {
 	        stackToSort.push(helpStack.pop());
@@ -122,28 +122,28 @@ public class TrainStationManager {
 
 	
 	public Map<String, Double> getTravelTimes() {
-		for (String stationName : shortestRoutes.getKeys()) {
+		for (String route : shortestRoutes.getKeys()) {
 		
-		int stops = 0;
-		String currentStation = stationName;
-		double distanceTime = shortestRoutes.get(stationName).getDistance() * 2.5;
-		
-		while (!currentStation.equals(origin) && shortestRoutes.get(currentStation) != null) {
-			stops++;
-		    currentStation = shortestRoutes.get(currentStation).getCityName();
-		}
-		double stopsTime;
-		
-        if (stops > 1) {
-        	stopsTime = (stops - 1) * 15;
-        } 
-        else {
-        	stopsTime = 0;
-        }		
-        
-        double totalTime = distanceTime + stopsTime;
-		
-		travelTimes.put(stationName, totalTime);
+			int stops = 0;
+			String currentRoute = route;
+			double distanceTime = shortestRoutes.get(route).getDistance() * 2.5;
+			
+			while (!currentRoute.equals(origin)) {
+				stops++;
+			    currentRoute = shortestRoutes.get(currentRoute).getCityName();
+			}
+			double stopsTime;
+			
+	        if (stops > 1) {
+	        	stopsTime = (stops - 1) * 15;
+	        } 
+	        else {
+	        	stopsTime = 0;
+	        }		
+	        
+	        double totalTime = distanceTime + stopsTime;
+			
+			travelTimes.put(route, totalTime);
 		}
 		return travelTimes;
 	}
@@ -179,9 +179,28 @@ public class TrainStationManager {
 	 * @return (String) String representation of the path taken to reach stationName.
 	 */
 	public String traceRoute(String stationName) {
-		Stack<String> route = new ArrayListStack<>();
-		String current = stationName;
-		return stationName;
+	    Stack<String> path = new LinkedListStack<>();
+	    String currentStation = stationName;
+	    
+	    while (!currentStation.equals(origin)) {
+	        Station nextStation = shortestRoutes.get(currentStation);
+
+	        path.push(currentStation);        	   
+	        currentStation = nextStation.getCityName();
+	    }
+	    path.push(origin); 
+
+	    // Build the route string
+	    StringBuilder routeTracer = new StringBuilder();
+	    
+	    while (!path.isEmpty()) {
+	        routeTracer.append(path.pop());
+	        
+	        if (!path.isEmpty()) {
+	            routeTracer.append("->");
+	        }
+	    }
+	    return routeTracer.toString();
 	}
 
 }
