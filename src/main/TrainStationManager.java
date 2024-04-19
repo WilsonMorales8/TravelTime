@@ -5,8 +5,11 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import data_structures.HashTableSC;
+import data_structures.LinkedListStack;
 import data_structures.SimpleHashFunction;
 import data_structures.ArrayList;
+import data_structures.ArrayListStack;
+import data_structures.HashSet;
 
 import interfaces.List;
 import interfaces.Map;
@@ -16,8 +19,9 @@ public class TrainStationManager {
 	
     private Map<String, List<Station>> stations = new HashTableSC<String, List<Station>>(1, new SimpleHashFunction<String>());
     private Map<String, Station> shortestRoutes = new HashTableSC<String, Station>(1, new SimpleHashFunction<String>());
-    private Map<String, Double> travelTime = new HashTableSC<String, Double>(1, new SimpleHashFunction<String>());
-	
+    private Map<String, Double> travelTimes = new HashTableSC<String, Double>(1, new SimpleHashFunction<String>());
+    String origin = "Westside";
+    
 	public TrainStationManager(String station_file) {	    
 		try (BufferedReader stationReader = new BufferedReader(new FileReader("inputFiles/" + station_file))) {
             String line = stationReader.readLine(); // Skip header line
@@ -48,49 +52,120 @@ public class TrainStationManager {
 					stations.get(destination).add(station2);
 				}
                 else {
-                	stations.get(destination).add(station2);                }
+                	stations.get(destination).add(station2);               
+                }
 			}
 			
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		findShortestDistance();
 	}
 	
 	
 	private void findShortestDistance() {
-				
+		HashSet<String> visited = new HashSet<String>();
+		Stack<Station> unvisited = new LinkedListStack<Station>();
+		
+		for (String station : stations.getKeys()) {
+			shortestRoutes.put(station, new Station (origin, Integer.MAX_VALUE));
+		}
+		
+		unvisited.push(new Station(origin, 0));
+		shortestRoutes.get(origin).setDistance(0);
+		
+		while (!unvisited.isEmpty()) {
+	        Station currentStation = unvisited.pop();
+	        visited.add(currentStation.getCityName());
+	        
+	        for (Station neighbor : stations.get(currentStation.getCityName())) {
+	            String neighborName = neighbor.getCityName();
+
+	            int currentShort = shortestRoutes.get(neighborName).getDistance(); // A
+	            int shortestDistance = shortestRoutes.get(currentStation.getCityName()).getDistance(); // B
+	            int distanceToNeighbor = neighbor.getDistance(); // C
+	            int newDistance = shortestDistance + distanceToNeighbor; // B + C
+	            
+	            if (currentShort > newDistance) { // A > B+C
+	                shortestRoutes.get(neighborName).setDistance(newDistance);
+	                shortestRoutes.get(neighborName).setCityName(currentStation.getCityName());
+	                
+	                if (!visited.isMember(neighborName)) {
+	                    unvisited.push(new Station(neighborName, newDistance));
+	                    sortStack(new Station(neighborName, newDistance), unvisited);
+	                }
+	            }
+	        }
+	    }
+		
 	}
 
 	
 	public void sortStack(Station station, Stack<Station> stackToSort) {
-		
-	}
-	
-	
-	public Map<String, Double> getTravelTimes() {
-		return travelTime;
-		// 5 minutes per kilometer
-		// 15 min per station	
+	    stackToSort.push(station);
+
+	    Stack<Station> helpStack = new LinkedListStack<>();
+	    
+	    while (!stackToSort.isEmpty()) {
+	        Station current = stackToSort.pop();
+	        while (!helpStack.isEmpty() && helpStack.top().getDistance() > current.getDistance()) {
+	            stackToSort.push(helpStack.pop());
+	        }
+	        helpStack.push(current);
+	    }
+	    while (!helpStack.isEmpty()) {
+	        stackToSort.push(helpStack.pop());
+	    }
 	}
 
+	
+	public Map<String, Double> getTravelTimes() {
+		for (String stationName : shortestRoutes.getKeys()) {
+		
+		int stops = 0;
+		String currentStation = stationName;
+		double distanceTime = shortestRoutes.get(stationName).getDistance() * 2.5;
+		
+		while (!currentStation.equals(origin) && shortestRoutes.get(currentStation) != null) {
+			stops++;
+		    currentStation = shortestRoutes.get(currentStation).getCityName();
+		}
+		double stopsTime;
+		
+        if (stops > 1) {
+        	stopsTime = (stops - 1) * 15;
+        } 
+        else {
+        	stopsTime = 0;
+        }		
+        
+        double totalTime = distanceTime + stopsTime;
+		
+		travelTimes.put(stationName, totalTime);
+		}
+		return travelTimes;
+	}
+
+	
 	public Map<String, List<Station>> getStations() {
-		return this.stations;
+		return stations;
 	}
 
 	
 	public void setStations(Map<String, List<Station>> cities) {
-		
+		stations = cities;
 	}
 
 
 	public Map<String, Station> getShortestRoutes() {
-		return this.shortestRoutes;
+		return shortestRoutes;
 	}
 
 	
 	public void setShortestRoutes(Map<String, Station> shortestRoutes) {
-		
+		this.shortestRoutes = shortestRoutes;
 	}
 	
 	
@@ -104,8 +179,33 @@ public class TrainStationManager {
 	 * @return (String) String representation of the path taken to reach stationName.
 	 */
 	public String traceRoute(String stationName) {
-		// Remove if you implement the method, otherwise LEAVE ALONE
-		throw new UnsupportedOperationException();
+		Stack<String> route = new ArrayListStack<>();
+		String current = stationName;
+		return stationName;
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
