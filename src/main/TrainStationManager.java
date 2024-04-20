@@ -14,6 +14,14 @@ import interfaces.List;
 import interfaces.Map;
 import interfaces.Stack;
 
+/**
+ * Manages train stations and routes to calculate the shortest path and travel times.
+ * It uses data structures like Maps, Stacks and lists to store station connections and to implement
+ * Dijkstra's algorithm for finding the shortest paths from the starting station "Westside"(origin).
+ * Maps are used throughout this class to maintain in order our stations and because they are good for accessability.
+ * 
+ * @author Wilson A Morales
+ */
 public class TrainStationManager {
 	
     private Map<String, List<Station>> stations = new HashTableSC<String, List<Station>>(1, new SimpleHashFunction<String>());
@@ -21,6 +29,13 @@ public class TrainStationManager {
     private Map<String, Double> travelTimes = new HashTableSC<String, Double>(1, new SimpleHashFunction<String>());
     String origin = "Westside";
     
+    /**
+     * Constructor that initializes the manager and loads stations from a file.
+     * Each line is read and processed into the station map which reflects the station network.
+     * Utilizes lists to store stations which will be added to the map. 
+     * This map will  store the stations and distances in a easy to access matter used in other methods. 
+     * @param station_file the relative path to the CSV file containing station data
+     */
 	public TrainStationManager(String station_file) {	    
 		try (BufferedReader stationReader = new BufferedReader(new FileReader("inputFiles/" + station_file))) {
             String line = stationReader.readLine();
@@ -61,7 +76,12 @@ public class TrainStationManager {
 		findShortestDistance();
 	}
 	
-	
+	 /**
+     * Implements Dijkstra's algorithm to find the shortest path from 'Westside' to all other stations and store it into a map.
+     * A stack is used to represent all the stations that have been discovered and need to be visited(neighbors).
+     * This stack is sorted to manage the station exploration order.
+     * It also uses a set to store visited stations.
+     */
 	private void findShortestDistance() {
 		HashSet<String> visited = new HashSet<String>();
 		Stack<Station> unvisited = new LinkedListStack<Station>();
@@ -99,7 +119,13 @@ public class TrainStationManager {
 		
 	}
 
-	
+	/**
+     * Sorts a stack of stations by distance in ascending order using a temporary stack to manage order.
+     * This method is important for maintaining the queue behavior needed for Dijkstra's algorithm.
+     * 
+     * @param station the new station to be added to the stack
+     * @param stackToSort the stack that needs to be sorted
+     */
 	public void sortStack(Station station, Stack<Station> stackToSort) {
 	    stackToSort.push(station);
 
@@ -117,7 +143,12 @@ public class TrainStationManager {
 	    }
 	}
 
-	
+	/**
+     * Calculates the travel time for each station from the origin based on the shortest path distances.
+     * The time is calculated as the sum of travel time per kilometer plus additional time per stop.
+     * 
+     * @return a map of station names to their respective travel times in minutes
+     */
 	public Map<String, Double> getTravelTimes() {
 		for (String route : shortestRoutes.getKeys()) {
 		
@@ -146,34 +177,51 @@ public class TrainStationManager {
 	}
 
 	
-	public Map<String, List<Station>> getStations() {
-		return stations;
-	}
+    /**
+     * Retrieves the current map of stations.
+     * 
+     * @return a map where the key is a station name and the value is a list of connected stations.
+     */
+    public Map<String, List<Station>> getStations() {
+        return stations;
+    }
 
-	
-	public void setStations(Map<String, List<Station>> cities) {
-		stations = cities;
-	}
+    /**
+     * Sets the map of stations to a new map.
+     * 
+     * @param cities a map of station names to lists of connected stations that will replace the current map.
+     */
+    public void setStations(Map<String, List<Station>> cities) {
+        this.stations = cities;
+    }
 
+    /**
+     * Retrieves the map containing the shortest routes from the origin station to all other stations.
+     * 
+     * @return a map of station names to their respective shortest route {@link Station} data.
+     */
+    public Map<String, Station> getShortestRoutes() {
+        return shortestRoutes;
+    }
 
-	public Map<String, Station> getShortestRoutes() {
-		return shortestRoutes;
-	}
+    /**
+     * Sets the map of shortest routes to a new map.
+     * 
+     * @param shortestRoutes a map of station names to {@link Station} objects representing the shortest routes.
+     */
+    public void setShortestRoutes(Map<String, Station> shortestRoutes) {
+        this.shortestRoutes = shortestRoutes;
+    }
 
-	
-	public void setShortestRoutes(Map<String, Station> shortestRoutes) {
-		this.shortestRoutes = shortestRoutes;
-	}
 	
 	
 	/**
-	 * BONUS EXERCISE THIS IS OPTIONAL
 	 * Returns the path to the station given. 
 	 * The format is as follows: Westside->stationA->.....stationZ->stationName
 	 * Each station is connected by an arrow and the trace ends at the station given.
 	 * 
 	 * @param stationName - Name of the station whose route we want to trace
-	 * @return (String) String representation of the path taken to reach stationName.
+	 * @return String representation of the path taken to reach stationName.
 	 */
 	public String traceRoute(String stationName) {
 		if (stations.get(stationName) == null) {
