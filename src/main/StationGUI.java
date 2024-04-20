@@ -64,7 +64,7 @@ public class StationGUI {
     private void createGUI() {
         frame = new JFrame("Westside Train Station Schedule");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500, 300);
+        frame.setSize(650, 300);
 
         model = new DefaultTableModel();
         model.addColumn("Station");
