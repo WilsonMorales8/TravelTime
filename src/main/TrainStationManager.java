@@ -23,16 +23,14 @@ public class TrainStationManager {
     
 	public TrainStationManager(String station_file) {	    
 		try (BufferedReader stationReader = new BufferedReader(new FileReader("inputFiles/" + station_file))) {
-            String line = stationReader.readLine(); // Skip header line
+            String line = stationReader.readLine();
             
-            //separate line by comas
             while ((line = stationReader.readLine()) != null) {
                 String[] parts = line.split(",");
                 String source = parts[0];
                 String destination = parts[1];
                 int distance = Integer.parseInt(parts[2]);
                 
-                // Create a new Station object for the destination and source
                 Station station1 = new Station(destination, distance);
                 Station station2 = new Station(source, distance);
                 
@@ -178,6 +176,10 @@ public class TrainStationManager {
 	 * @return (String) String representation of the path taken to reach stationName.
 	 */
 	public String traceRoute(String stationName) {
+		if (stations.get(stationName) == null) {
+			return "Invalid City";
+		}
+		
 	    Stack<String> path = new LinkedListStack<>();
 	    String currentStation = stationName;
 	    
@@ -189,7 +191,6 @@ public class TrainStationManager {
 	    }
 	    path.push(origin); 
 
-	    // Build the route string
 	    StringBuilder routeTracer = new StringBuilder();
 	    
 	    while (!path.isEmpty()) {

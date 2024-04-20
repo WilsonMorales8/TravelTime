@@ -15,14 +15,16 @@ public class StationGUI {
     private DefaultTableModel model;
     private Map<String, Double> travelTimes;
     private Map<String, String> departureTimes = new HashTableSC<String, String>(1, new SimpleHashFunction<String>());
+    private TrainStationManager manager;
 
     public StationGUI(TrainStationManager manager) {
+    	this.manager = manager;
         this.travelTimes = manager.getTravelTimes(); 
-        initializeDepartureTimes();
-        initializeGUI();
+        departureTimes();
+        createGUI();
     }
 
-    private void initializeDepartureTimes() {
+    private void departureTimes() {
         departureTimes.put("Bugapest", "9:35 am");
         departureTimes.put("Dubay", "10:30 am");
         departureTimes.put("Berlint", "8:25 pm");
@@ -37,7 +39,7 @@ public class StationGUI {
         departureTimes.put("Loondun", "2:00 pm");
     }
 
-    private void initializeGUI() {
+    private void createGUI() {
         frame = new JFrame("Westside Train Station Schedule");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(500, 300);
@@ -47,15 +49,34 @@ public class StationGUI {
         model.addColumn("Departure");
         model.addColumn("Arrival");
 
-        populateTable();
+        setupGUI();
 
         table = new JTable(model);
         frame.add(new JScrollPane(table), BorderLayout.CENTER);
 
+        
+        JPanel panel = new JPanel();
+        JTextField textField = new JTextField(10);
+        JButton button = new JButton("Search Route");
+        JLabel label = new JLabel();
+
+        button.addActionListener(e -> {
+            String stationName = textField.getText();
+            String route = manager.traceRoute(stationName);
+            label.setText(route);
+        });
+
+        panel.add(textField);
+        panel.add(button);
+        panel.add(label);
+
+        frame.add(panel, BorderLayout.SOUTH);
+        
+        
         frame.setVisible(true);
     }
 
-    private void populateTable() {
+    private void setupGUI() {
         for (String station : departureTimes.getKeys()) {
             String departure = departureTimes.get(station);  
             Double travelTime = travelTimes.get(station);  
@@ -69,7 +90,7 @@ public class StationGUI {
         String[] parts = departure.split("[: ]");  
         int hour = Integer.parseInt(parts[0]);
         int minutes = Integer.parseInt(parts[1]);
-        String amPm = parts[2];
+        String time = parts[2];
 
         minutes += travelTimeMinutes;  
         hour += minutes / 60; 
@@ -79,15 +100,15 @@ public class StationGUI {
             if (hour > 12) {
             	hour -= 12; 
             }
-            if ("am".equals(amPm)) {
-                amPm = "pm";
+            if ("am".equals(time)) {
+                time = "pm";
             } 
             else {
-                amPm = "am"; 
+                time = "am"; 
             }
         }
 
-        return String.format("%d:%02d %s", hour, minutes, amPm);  
+        return String.format("%d:%02d %s", hour, minutes, time);  
     }
 
     public static void main(String[] args) {
@@ -95,21 +116,3 @@ public class StationGUI {
         new StationGUI(manager);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
