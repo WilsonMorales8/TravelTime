@@ -8,7 +8,6 @@ import data_structures.HashTableSC;
 import data_structures.LinkedListStack;
 import data_structures.SimpleHashFunction;
 import data_structures.ArrayList;
-import data_structures.ArrayListStack;
 import data_structures.HashSet;
 
 import interfaces.List;
@@ -204,27 +203,6 @@ public class TrainStationManager {
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
